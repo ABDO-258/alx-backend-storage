@@ -1,0 +1,2 @@
+// list all with regular expression
+db.school.find({ name: { $regex: '^Holberton*' } })
