@@ -2,7 +2,20 @@
 """Module for redis task"""
 from uuid import uuid4
 from typing import Union, Callable, Optional
+from functools import wraps
 import redis
+
+
+def count_calls(method: Callable) -> Callable:
+    """count the number of time a class Cache methode is called"""
+    key = method.__qualname__
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """some documentation"""
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+    return wrapper
 
 
 class Cache:
@@ -12,6 +25,7 @@ class Cache:
         self._redis = redis.Redis()  # Create a Redis client instance
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data:  Union[str, bytes, int, float]) -> str:
         """method that takes a data argument and returns a string"""
         random_key = str(uuid4())
