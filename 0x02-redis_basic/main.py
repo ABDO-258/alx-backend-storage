@@ -56,3 +56,11 @@ print("inputs: {}".format(inputs))
 print("outputs: {}".format(outputs))
 
 print("All tests passed successfully!task3")
+
+replay = __import__('exercise').replay
+
+cache = Cache()
+cache.store("foo")
+cache.store("bar")
+cache.store(42)
+replay(cache.store)
