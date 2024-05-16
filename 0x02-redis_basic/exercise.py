@@ -18,6 +18,24 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    """count the number of time a class Cache methode is called"""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """some documentation"""
+        input_key = f"{method.__qualname__}:inputs"
+        output_key = f"{method.__qualname__}:outputs"
+
+        # Store inputs as a string
+        self._redis.rpush(input_key, str(args))
+
+        # Execute the method and store the output
+        output = method(self, *args, **kwargs)
+        self._redis.rpush(output_key, str(output))
+        return output
+    return wrapper
+
+
 class Cache:
     """class docstring"""
     def __init__(self) -> None:
@@ -25,6 +43,7 @@ class Cache:
         self._redis = redis.Redis()  # Create a Redis client instance
         self._redis.flushdb()
 
+    @call_history
     @count_calls
     def store(self, data:  Union[str, bytes, int, float]) -> str:
         """method that takes a data argument and returns a string"""
